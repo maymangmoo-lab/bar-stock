@@ -378,11 +378,12 @@ let prevOut={}, todayIn={}, prevDate='', todayInDate='';
 let pendData=[], pendStaff='';
 
 // INIT
-function init(){
+async function init(){
   autoClear();
   DRAFT=S.get('kn_out_draft_'+todayKey(),{});
   setDate();
-  renderItems();
+  await fetchItems();
+  await fetchStaff();
   checkSentToday();
   fetchPrev();
 }

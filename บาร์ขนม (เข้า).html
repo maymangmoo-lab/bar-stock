@@ -348,13 +348,13 @@ let curStaff = '';
 let pendData = [], pendStaff = '';
 
 // ── INIT ──
-function init(){
+async function init(){
   autoClear();
-  DRAFT = S.get('kn_in_draft_'+todayKey(),{});
+  DRAFT=S.get('kn_in_draft_'+todayKey(),{});
   setDate();
-  renderItems();
+  await fetchItems();
+  await fetchStaff();
   checkSentToday();
-  fetchItems();
 }
 
 function setDate(){
