@@ -594,7 +594,9 @@ function delItem(i){
 }
 async function saveItems(){
   S.set('kn_items',ITEMS);
-  if(URL_){
+  // อ่าน URL จาก localStorage ตรงๆ ไม่ใช้ตัวแปร URL_
+  const activeUrl = localStorage.getItem('kn_in_url') || '';
+  if(activeUrl){
     try{
       await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({action:'saveItems',sheet:'รายการวัตถุดิบ (ขนม)',items:ITEMS})
