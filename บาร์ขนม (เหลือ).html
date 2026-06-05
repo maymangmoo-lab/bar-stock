@@ -718,15 +718,13 @@ function delItem(i){
 }
 async function saveItems(){
   S.set('kn_items',ITEMS);
-  // อ่าน URL จาก localStorage ตรงๆ ไม่ใช้ตัวแปร URL_
-  const activeUrl = localStorage.getItem('kn_out_url') || '';
-  if(activeUrl){
-    try{
-      await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({action:'saveItems',sheet:'รายการวัตถุดิบ (ขนม)',items:ITEMS})
-      });
-    }catch(e){}
-  }
+  try{
+    await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'*/*'},
+      body:JSON.stringify({action:'saveItems',sheet:'รายการวัตถุดิบ (ขนม)',items:ITEMS})
+    });
+  }catch(e){}
 }
 
 async function fetchItems(){
@@ -765,6 +763,7 @@ function saveSettings(){
   localStorage.setItem('kn_out_url',URL_);
   localStorage.setItem('kn_out_line',LINE_);
   localStorage.setItem('kn_out_group',LINE_GROUP);
+  saveItems();
   const al=document.getElementById('salert');
   al.className='salert ok'; al.textContent='💾 บันทึกแล้ว';
   setTimeout(()=>{al.style.display='none';},3000);
