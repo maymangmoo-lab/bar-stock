@@ -711,18 +711,19 @@ function renderItemManage(){
 function addItem(){
   const inp=document.getElementById('new-item'),name=inp.value.trim();
   if(!name||ITEMS.find(x=>x.key===name)){inp.value='';return;}
-  ITEMS.push({key:name,unit:'g'});saveItems();inp.value='';renderItemManage();renderItems();renderThresh();
+  ITEMS.push({key:name,unit:'g'});inp.value='';renderItemManage();renderItems();saveItems();renderThresh();
 }
 function delItem(i){
   ITEMS.splice(i,1);saveItems();renderItemManage();renderItems();renderThresh();
 }
-function saveItems(){
+async function saveItems(){
   S.set('kn_items',ITEMS);
-  // sync ขึ้น Sheet
   if(URL_){
-    fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'saveItems',sheet:'รายการวัตถุดิบ (ขนม)',items:ITEMS})
-    }).catch(()=>{});
+    try{
+      await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'saveItems',sheet:'รายการวัตถุดิบ (ขนม)',items:ITEMS})
+      });
+    }catch(e){}
   }
 }
 
