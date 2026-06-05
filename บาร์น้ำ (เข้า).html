@@ -13,15 +13,26 @@ input[type=number]{-moz-appearance:textfield}
 html,body{height:100%;overflow:hidden}
 body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:flex;flex-direction:column;height:100%}
 /* HEADER */
-.hdr{background:#2c2c2e;padding:14px 18px 12px;border-bottom:1px solid #3a3a3c}
+.hdr{background:#2c2c2e;padding:10px 18px 8px;border-bottom:none}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.hdr-title{font-size:22px;font-weight:500;color:#f5f5f5}
+.hdr-badge{font-size:12px;background:#3a3a3c;color:#ccc;padding:5px 16px;border-radius:20px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.reload-icon{background:none;border:none;color:#888;font-size:16px;cursor:pointer;padding:2px;display:flex;align-items:center;font-family:'Sarabun',sans-serif}
+.hdr-mid{display:flex;align-items:center;justify-content:space-between;margin-bottom:0}
+.hdr-date{font-size:12px;color:#888}
+.prog-row{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.prog-bg{width:70px;height:2px;background:#3a3a3c;border-radius:2px}
+
+.prog-txt{font-size:10px;color:#888;white-space:nowrap}
 .hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .hdr-title{font-size:24px;font-weight:500;color:#f5f5f5}
 .hdr-badge{font-size:12px;background:#3a3a3c;color:#aaa;padding:4px 14px;border-radius:20px}
-.hdr-date{font-size:12px;color:#888;margin-bottom:10px}
-.prog-row{display:flex;align-items:center;gap:10px}
-.prog-bg{flex:1;height:2px;background:#3a3a3c;border-radius:2px}
-.prog-fill{height:2px;background:#f5f5f5;border-radius:2px;transition:width .3s;width:0%}
-.prog-txt{font-size:11px;color:#888;white-space:nowrap}
+
+
+
+
+
 
 /* TABS - bottom */
 .tabs{background:#2c2c2e;border-top:1px solid #3a3a3c;display:flex;align-items:center;padding:4px 14px 8px;order:999;flex-shrink:0}
@@ -38,40 +49,64 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 .page.on{display:flex}
 
 /* STAFF */
-.staff-bar{background:#2c2c2e;border-bottom:1px solid #3a3a3c;padding:10px 18px;display:flex;align-items:center;gap:10px}
-.staff-sq{width:14px;height:14px;border:1.5px solid #555;border-radius:3px;flex-shrink:0}
-.staff-lbl{font-size:13px;color:#888}
-.staff-name{font-size:13px;font-weight:500;color:#f5f5f5;flex:1}
-.staff-btn{background:#3a3a3c;border:none;border-radius:20px;color:#ccc;font-family:'Sarabun',sans-serif;font-size:12px;padding:4px 14px;cursor:pointer}
+.staff-bar{background:#2c2c2e;border-bottom:1px solid #3a3a3c;border-top:1px solid #3a3a3c;padding:8px 18px;display:flex;align-items:center;gap:8px}
+.staff-sq{display:none}
+
+
+.staff-btn{background:#3a3a3c;border:none;border-radius:20px;color:#ccc;font-family:'Sarabun',sans-serif;font-size:12px;padding:5px 16px;cursor:pointer}
+
+
+
+
 
 /* ALERT */
-.alert{display:none;margin:10px 18px 0;padding:10px 14px;border-radius:8px;font-size:13px;border-left:3px solid;white-space:pre-line;line-height:1.6}
-.alert.ok{background:#1a2e1a;color:#5cb85c;border-color:#2a6b2a;display:block}
-.alert.err{background:#2e1a1a;color:#e05050;border-color:#6b1f1f;display:block}
-.alert.warn{background:#2e2010;color:#e09030;border-color:#6b4010;display:block}
-.alert.info{background:#1a1e2e;color:#6080e0;border-color:#2030af;display:block}
-.sent-warn{display:none;margin:10px 18px 0;padding:9px 12px;background:#2e2010;border:1px solid #6b400f;border-radius:8px;font-size:12px;color:#e09030;line-height:1.5}
+.alert{display:none;padding:7px 18px;font-size:12px;border-left:3px solid;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+
+
+
+.sent-warn{display:none;padding:6px 18px;background:#2e2010;border-left:3px solid #6b400f;font-size:12px;color:#e09030;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+
+
+
+
 
 /* ITEMS */
 .items{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px}
-.row{display:flex;align-items:center;padding:11px 0;border-bottom:1px solid #3a3a3c}
-.row:last-child{border-bottom:none}
-.rleft{flex:1;display:flex;align-items:center;gap:10px;min-width:0;padding-right:10px}
-.dot{width:7px;height:7px;border-radius:50%;background:#484848;flex-shrink:0}
-.dot.on{background:#f5f5f5}
-.rname{font-size:14px;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
-.rright{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.rinput{width:120px;text-align:right;font-size:16px;padding:9px 12px;border:1px solid #484848;border-radius:8px;background:#3a3a3c;color:#f5f5f5}
-.rinput:focus{outline:none;border-color:#686868;background:#444}
-.rinput.on{background:#444446;border-color:#686868}
-.runit{font-size:12px;color:#777;width:12px;flex-shrink:0}
+.row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #3a3a3c}
+
+.rleft{width:55%;display:flex;align-items:center;gap:8px;min-width:0}
+.dot{width:6px;height:6px;border-radius:50%;background:#484848;flex-shrink:0}
+
+.rname{font-size:13px;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.rright{width:45%;display:flex;align-items:center;gap:5px;justify-content:flex-end;flex-shrink:0}
+.rinput{width:calc(100% - 18px);text-align:right;font-size:14px;padding:6px 10px;border:1px solid #484848;border-radius:8px;background:#3a3a3c;color:#f5f5f5}
+
+
+.runit{font-size:11px;color:#777;width:12px;flex-shrink:0}
+
+
+
+
+
+
+
+
+
+
+
 
 /* SUBMIT */
-.foot{background:#2c2c2e;border-top:1px solid #3a3a3c;padding:12px 18px 20px}
-.sbtn{width:100%;padding:15px;background:#f5f5f5;color:#1c1c1e;border:none;border-radius:12px;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:500;cursor:pointer}
-.sbtn:active{opacity:.85}
-.sbtn:disabled{background:#3a3a3c;color:#555;cursor:not-allowed}
-.reset{display:block;text-align:center;font-size:12px;color:#555;margin-top:8px;cursor:pointer;text-decoration:underline;background:none;border:none;width:100%;font-family:'Sarabun',sans-serif}
+.foot{background:#2c2c2e;border-top:1px solid #3a3a3c;padding:8px 18px 20px;display:flex;align-items:center;gap:8px}
+.sbtn{flex:1;padding:14px;background:#f5f5f5;color:#1c1c1e;border:none;border-radius:12px;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:500;cursor:pointer}
+
+
+.reset{background:none;border:1px solid #444;border-radius:8px;color:#666;font-size:16px;padding:9px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;font-family:'Sarabun',sans-serif}
+
+
+
+
 
 /* CONFIRM SHEET */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:100;align-items:flex-end}
@@ -225,19 +260,21 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 <div class="hdr">
   <div class="hdr-top">
     <div class="hdr-title">เตรียมของบาร์น้ำ</div>
-    <div class="hdr-badge">เข้า</div>
+    <div class="hdr-right"><div class="hdr-badge">เข้า</div>
   </div>
-  <div class="hdr-date" id="hdate"></div>
-  <div class="prog-row">
-    <div class="prog-bg"><div class="prog-fill" id="prog"></div></div>
-    <div class="prog-txt" id="progtxt">0 / 0</div>
+  <div class="hdr-mid">
+    <div class="hdr-date" id="hdate"></div>
+    <div class="prog-row">
+      <div class="prog-bg"><div class="prog-fill" id="prog"></div></div>
+      <div class="prog-txt" id="progtxt">0 / 0</div>
+    </div>
   </div>
 </div>
 
 <!-- PAGE 0: FORM -->
 <div class="page on" id="p0">
   <div class="staff-bar">
-    <div class="staff-sq"></div>
+    <i class="ti ti-user" style="font-size:14px;color:#666" aria-hidden="true"></i>
     <span class="staff-lbl">พนักงาน</span>
     <span class="staff-name" id="sname">— เลือกชื่อ —</span>
     <button class="staff-btn" onclick="pickStaff()">เปลี่ยน</button>
@@ -246,8 +283,8 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
   <div class="alert" id="alert"></div>
   <div class="items" id="items"></div>
   <div class="foot">
+    <button class="reset" onclick="resetAll()" aria-label="ล้างข้อมูล"><i class="ti ti-trash" aria-hidden="true"></i></button>
     <button class="sbtn" id="sbtn" disabled onclick="showOv()">ตรวจสอบและบันทึก</button>
-    <button class="reset" onclick="resetAll()">ล้างข้อมูลที่กรอกไว้ทั้งหมด</button>
   </div>
 </div>
 

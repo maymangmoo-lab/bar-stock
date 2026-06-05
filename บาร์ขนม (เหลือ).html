@@ -14,22 +14,33 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:flex;flex-direction:column;height:100%}
 
 /* HEADER */
-.hdr{background:#2c2c2e;padding:14px 18px 12px;border-bottom:1px solid #3a3a3c}
+.hdr{background:#2c2c2e;padding:10px 18px 8px;border-bottom:none}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.hdr-title{font-size:22px;font-weight:500;color:#f5f5f5}
+.hdr-badge{font-size:12px;background:#3a3a3c;color:#ccc;padding:5px 16px;border-radius:20px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+.reload-icon{background:none;border:none;color:#888;font-size:16px;cursor:pointer;padding:2px;display:flex;align-items:center;font-family:'Sarabun',sans-serif}
+.hdr-mid{display:flex;align-items:center;justify-content:space-between;margin-bottom:0}
+.hdr-date{font-size:12px;color:#888}
+.prog-row{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.prog-bg{width:70px;height:2px;background:#3a3a3c;border-radius:2px}
+
+.prog-txt{font-size:10px;color:#888;white-space:nowrap}
 .hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .hdr-title{font-size:24px;font-weight:500;color:#f5f5f5}
 .hdr-badge{font-size:12px;background:#3a3a3c;color:#aaa;padding:4px 14px;border-radius:20px}
-.hdr-date{font-size:12px;color:#888;margin-bottom:10px}
-.prog-row{display:flex;align-items:center;gap:10px}
-.prog-bg{flex:1;height:2px;background:#3a3a3c;border-radius:2px}
-.prog-fill{height:2px;background:#f5f5f5;border-radius:2px;transition:width .3s;width:0%}
-.prog-txt{font-size:11px;color:#888;white-space:nowrap}
+
+
+
+
+
 
 /* STAFF */
 .staff-bar{background:#2c2c2e;border-bottom:1px solid #3a3a3c;padding:10px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-.staff-sq{width:14px;height:14px;border:1.5px solid #555;border-radius:3px;flex-shrink:0}
-.staff-lbl{font-size:13px;color:#888}
-.staff-name{font-size:13px;font-weight:500;color:#f5f5f5;flex:1}
-.staff-btn{background:#3a3a3c;border:none;border-radius:20px;color:#ccc;font-family:'Sarabun',sans-serif;font-size:12px;padding:4px 14px;cursor:pointer}
+
+
+
+
 
 /* SHEET STATUS */
 .sheet-status{display:none;margin:10px 18px 0;padding:9px 12px;border-radius:8px;font-size:12px;border-left:3px solid;line-height:1.6;white-space:pre-line;flex-shrink:0}
@@ -40,9 +51,9 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 
 /* ALERTS */
 .alert{display:none;margin:10px 18px 0;padding:10px 14px;border-radius:8px;font-size:13px;border-left:3px solid;white-space:pre-line;line-height:1.6;flex-shrink:0}
-.alert.ok{background:#1a2e1a;color:#5cb85c;border-color:#2a6b2a;display:block}
-.alert.err{background:#2e1a1a;color:#e05050;border-color:#6b1f1f;display:block}
-.alert.warn{background:#2e2010;color:#e09030;border-color:#6b4010;display:block}
+
+
+
 .sent-warn{display:none;margin:10px 18px 0;padding:9px 12px;background:#2e2010;border:1px solid #6b400f;border-radius:8px;font-size:12px;color:#e09030;line-height:1.5;flex-shrink:0}
 
 /* PAGES */
@@ -51,31 +62,42 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 
 /* ITEMS */
 .items{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px}
+.row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #3a3a3c}
+
+.rleft{width:55%;display:flex;align-items:center;gap:8px;min-width:0}
+.dot{width:6px;height:6px;border-radius:50%;background:#484848;flex-shrink:0}
+
+.rname{font-size:13px;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.rright{width:45%;display:flex;align-items:center;gap:5px;justify-content:flex-end;flex-shrink:0}
+.rinput{width:calc(100% - 18px);text-align:right;font-size:14px;padding:6px 10px;border:1px solid #484848;border-radius:8px;background:#3a3a3c;color:#f5f5f5}
+
+
+.runit{font-size:11px;color:#777;width:12px;flex-shrink:0}
 .row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #3a3a3c}
-.row:last-child{border-bottom:none}
+
 .row.is-low{background:transparent}
 .rleft{flex:1;min-width:0;padding-right:10px}
 .name-line{display:flex;align-items:center;gap:8px;margin-bottom:2px}
-.dot{width:7px;height:7px;border-radius:50%;background:#484848;flex-shrink:0}
-.dot.on{background:#f5f5f5}
+
+
 .dot.low{background:#e05050}
-.rname{font-size:14px;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+
 .hint{font-size:10px;color:#666;padding-left:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hint.low{color:#c04040}
-.rright{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.rinput{width:120px;text-align:right;font-size:16px;padding:9px 12px;border:1px solid #484848;border-radius:8px;background:#3a3a3c;color:#f5f5f5}
-.rinput:focus{outline:none;border-color:#686868;background:#444}
-.rinput.on{background:#444446;border-color:#686868}
+
+
+
+
 .rinput.low{background:#2e1a1a;border-color:#7a2020;color:#e05050}
-.runit{font-size:12px;color:#777;width:12px;flex-shrink:0}
+
 .runit.low{color:#e05050}
 
 /* SUBMIT */
 .foot{background:#2c2c2e;border-top:1px solid #3a3a3c;padding:12px 18px 20px;flex-shrink:0}
-.sbtn{width:100%;padding:15px;background:#f5f5f5;color:#1c1c1e;border:none;border-radius:12px;font-family:'Sarabun',sans-serif;font-size:16px;font-weight:500;cursor:pointer}
-.sbtn:active{opacity:.85}
-.sbtn:disabled{background:#3a3a3c;color:#555;cursor:not-allowed}
-.reset{display:block;text-align:center;font-size:12px;color:#555;margin-top:8px;cursor:pointer;text-decoration:underline;background:none;border:none;width:100%;font-family:'Sarabun',sans-serif}
+
+
+
+
 
 /* TABS */
 .tabs{background:#2c2c2e;border-top:1px solid #3a3a3c;display:flex;align-items:center;padding:4px 14px 8px;flex-shrink:0}
@@ -247,19 +269,21 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 <div class="hdr">
   <div class="hdr-top">
     <div class="hdr-title">ของเหลือบาร์ขนม</div>
-    <div class="hdr-badge">ขนม เหลือ</div>
+    <div class="hdr-right"><div class="hdr-badge">ขนม เหลือ</div>
   </div>
-  <div class="hdr-date" id="hdate"></div>
-  <div class="prog-row">
-    <div class="prog-bg"><div class="prog-fill" id="prog"></div></div>
-    <div class="prog-txt" id="progtxt">0 / 0</div>
+  <div class="hdr-mid">
+    <div class="hdr-date" id="hdate"></div>
+    <div class="prog-row">
+      <div class="prog-bg"><div class="prog-fill" id="prog"></div></div>
+      <div class="prog-txt" id="progtxt">0 / 0</div>
+    </div>
   </div>
 </div>
 
 <!-- PAGE 0: FORM -->
 <div class="page on" id="p0">
   <div class="staff-bar">
-    <div class="staff-sq"></div>
+    <i class="ti ti-user" style="font-size:14px;color:#666" aria-hidden="true"></i>
     <span class="staff-lbl">พนักงาน</span>
     <span class="staff-name" id="sname">— เลือกชื่อ —</span>
     <button class="staff-btn" onclick="pickStaff()">เปลี่ยน</button>
