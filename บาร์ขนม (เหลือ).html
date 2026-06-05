@@ -347,6 +347,13 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 </div>
 
 <script>
+
+  // ── ค่าที่ฝังไว้ตายตัว (ไม่ต้องตั้งค่าบนเครื่อง) ──
+  (function() {
+    if (!localStorage.getItem('kn_out_url')) localStorage.setItem('kn_out_url', 'https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec');
+    if (!localStorage.getItem('kn_out_line')) localStorage.setItem('kn_out_line', 'mJeaffCgOfpp8wGoCVPBIPmN2xF6hTGmJ2jrsD+8nM+aw06l6XgnG4FN15gtMIf3zmg1Ykv1ftyhQFL2747GUAza3t29pMaE73j3XkEd1ukz5kDu61Emig1G0mJ79ePVAaJeJehzQh709C0l3rs7+wdB04t89/1O/w1cDnyilFU=');
+    if (!localStorage.getItem('kn_out_group')) localStorage.setItem('kn_out_group', 'C6221fd159fa6f8f54c7137d7a74e7f65');
+  })();
 const S={
   get(k,d){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):d}catch{return d}},
   set(k,v){localStorage.setItem(k,JSON.stringify(v))}
