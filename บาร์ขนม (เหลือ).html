@@ -729,10 +729,19 @@ async function saveItems(){
 
 async function fetchItems(){
   try{
-    const r=await fetch(URL_+'?action=getItems&sheet='+encodeURIComponent('รายการวัตถุดิบ (ขนม)'));
+    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getItems&sheet='+encodeURIComponent('รายการวัตถุดิบ (ขนม)'));
     const j=await r.json();
-    if(j.items&&j.items.length){ITEMS=j.items;S.set('kn_items',ITEMS);renderItems();renderItemManage();renderThresh();}
-  }catch(e){}
+    if(j.items&&j.items.length){
+      ITEMS=j.items;
+      S.set('kn_items',ITEMS);
+      renderItems();
+      if(typeof renderItemManage==='function') renderItemManage();
+      if(typeof renderThresh==='function') renderThresh();
+    }
+  }catch(e){
+    ITEMS=S.get('kn_items',[]);
+    renderItems();
+  }
 }
 
 function renderThresh(){
@@ -745,6 +754,27 @@ function renderThresh(){
     </div>`).join('');
 }
 
+async function fetchStaff(){
+  try{
+    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getStaff');
+    const j=await r.json();
+    if(j.staff&&j.staff.length){
+      STAFF=j.staff;
+      S.set('kn_out_staff',STAFF);
+      if(typeof renderStaffTags==='function') renderStaffTags();
+    }
+  }catch(e){}
+}
+
+async function saveStaff(){
+  S.set('kn_out_staff',STAFF);
+  try{
+    await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'saveStaff',staff:STAFF})
+    });
+  }catch(e){}
+}
+
 function renderStaffTags(){
   document.getElementById('staff-tags').innerHTML=STAFF.map((s,i)=>`
     <div class="stag"><span>${s}</span><button onclick="delStaff(${i})">×</button></div>`).join('');
@@ -752,9 +782,9 @@ function renderStaffTags(){
 function addStaff(){
   const inp=document.getElementById('new-staff'),name=inp.value.trim();
   if(!name||STAFF.includes(name)){inp.value='';return;}
-  STAFF.push(name);S.set('kn_out_staff',STAFF);inp.value='';renderStaffTags();
+  STAFF.push(name);inp.value='';renderStaffTags();saveStaff();
 }
-function delStaff(i){STAFF.splice(i,1);S.set('kn_out_staff',STAFF);renderStaffTags();}
+function delStaff(i){STAFF.splice(i,1);renderStaffTags();saveStaff();}
 
 function saveSettings(){
   URL_=document.getElementById('s-url').value.trim();
