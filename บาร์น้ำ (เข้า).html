@@ -426,8 +426,9 @@ function checkReady(){
 }
 
 // ── STAFF ──
-function pickStaff(){
-  if(!STAFF.length){showAlert('err','ยังไม่มีรายชื่อพนักงาน กรุณาเพิ่มในหน้าตั้งค่า');return;}
+async function pickStaff(){
+  if(!STAFF.length){ await fetchStaff(); }
+  if(!STAFF.length){ showAlert('warn','กำลังโหลดชื่อพนักงาน...'); return; }
   document.getElementById('sp-list').innerHTML=STAFF.map((s,i)=>
     `<button class="sp-item${curStaff===s?' sel':''}" onclick="selectStaff('${s}')">${s}</button>`
   ).join('');
