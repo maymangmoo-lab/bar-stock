@@ -493,7 +493,7 @@ async function doSend(){
   if(URL_){
     for(let t=1;t<=3;t++){
       try{
-        await fetch(URL_,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+        await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({action:'addIn',sheet:'เช้า',date:dateStr,staff:pendStaff,items:pendData})});
         ok=true; break;
       }catch(e){
@@ -593,7 +593,15 @@ function delItem(i){
   if(!confirm('ลบ "'+ITEMS[i].key+'" ออกจากรายการ?'))return;
   ITEMS.splice(i,1);saveItems();renderItemManage();renderItems();
 }
-function saveItems(){S.set('app_items',ITEMS);}
+function saveItems(){
+  S.set('app_items',ITEMS);
+  // sync ขึ้น Sheet
+  if(URL_){
+    fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'saveItems',items:ITEMS})
+    }).catch(()=>{});
+  }
+}
 
 async function fetchItems(){
   try{
