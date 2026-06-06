@@ -509,18 +509,6 @@ async function doSend(){
     }
   }
 
-  const lineKey='in_line_sent_'+todayKey();
-  if(LINE_ && !localStorage.getItem(lineKey)){
-    let msg='\n📦 บาร์น้ำ (เข้า) '+dateStr+'\nโดย: '+pendStaff+'\n';
-    pendData.forEach(d=>{msg+='• '+d.item+': +'+d.val.toLocaleString()+' '+d.unit+'\n';});
-    try{
-      await fetch('https://api.line.me/v2/bot/message/push',{method:'POST',
-        headers:{'Authorization':'Bearer '+LINE_,'Content-Type':'application/json'},
-        body:JSON.stringify({to:LINE_GROUP,messages:[{type:'text',text:msg}]})});
-      localStorage.setItem(lineKey,'1');
-    }catch(e){}
-  }
-
   // save history & update draft
   HISTORY.unshift({date:dateStr,dk:todayKey(),staff:pendStaff,data:pendData});
   if(HISTORY.length>60) HISTORY=HISTORY.slice(0,60);

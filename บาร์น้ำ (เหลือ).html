@@ -625,18 +625,16 @@ async function doSend(){
 
   const lineKey='out_line_sent_'+todayKey();
   if(LINE_ && !localStorage.getItem(lineKey)){
-    const lowItems=pendData.filter(d=>THRESH[d.item]&&d.out<THRESH[d.item]);
-    let msg='\n<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> บาร์น้ำ (เหลือ) '+dateStr+'\nโดย: '+pendStaff+'\n';
+    let msg='\n📋 บาร์น้ำ (เหลือ) '+dateStr+'\nโดย: '+pendStaff+'\n';
     pendData.forEach(d=>{
-      const prev=prevOut[d.item];
-      if(prev!=null) msg+='• '+d.item+': '+prev.toLocaleString()+' + '+d.in.toLocaleString()+' → ใช้ '+(d.used!=null?d.used.toLocaleString():'?')+' | เหลือ '+d.out.toLocaleString()+' '+(d.unit||'g')+'\n';
-      else msg+='• '+d.item+': เหลือ '+d.out.toLocaleString()+' '+(d.unit||'g')+'\n';
+      msg+='• '+d.item+': เข้า '+d.in.toLocaleString()+' / เหลือ '+d.out.toLocaleString()+' '+(d.unit||'g')+'\n';
     });
-    if(lowItems.length) msg+='\n⚠️ ของเหลือน้อย: '+lowItems.map(d=>d.item).join(', ')+' — ต้องสั่งเพิ่ม!';
+    const lowItems=pendData.filter(d=>THRESH[d.item]!=null&&d.out<THRESH[d.item]);
+    if(lowItems.length) msg+='\n⚠️ ของเหลือน้อย: '+lowItems.map(d=>d.item).join(', ');
     try{
-      await fetch('https://api.line.me/v2/bot/message/push',{method:'POST',
-        headers:{'Authorization':'Bearer '+LINE_,'Content-Type':'application/json'},
-        body:JSON.stringify({to:LINE_GROUP,messages:[{type:'text',text:msg}]})});
+      await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'sendLine',token:LINE_,group:LINE_GROUP,message:msg})});
       localStorage.setItem(lineKey,'1');
     }catch(e){}
   }
