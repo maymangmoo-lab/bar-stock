@@ -724,10 +724,9 @@ function delItem(i){
 async function saveItems(){
   S.set('app_items',ITEMS);
   try{
-    await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'*/*'},
-      body:JSON.stringify({action:'saveItems',sheet:'รายการวัตถุดิบ',items:ITEMS})
+    const itemsWithThresh=ITEMS.map(it=>({...it,thresh:THRESH[it.key]!=null?THRESH[it.key]:null}));
+    await fetch('https://restless-field-d96c.may-mangmoo.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'saveItems',sheet:'รายการวัตถุดิบ',items:itemsWithThresh})
     });
   }catch(e){}
 }
@@ -739,6 +738,11 @@ async function fetchItems(){
     if(j.items&&j.items.length){
       ITEMS=j.items;
       S.set('app_items',ITEMS);
+      // โหลด threshold จาก Sheet
+      j.items.forEach(it=>{
+        if(it.thresh!=null) THRESH[it.key]=it.thresh;
+      });
+      S.set('out_thresh',THRESH);
       renderItems();
       if(typeof renderItemManage==='function') renderItemManage();
       if(typeof renderThresh==='function') renderThresh();
@@ -753,8 +757,8 @@ function renderThresh(){
   document.getElementById('thresh-list').innerHTML=ITEMS.map(it=>`
     <div class="thresh-row">
       <label>${it.key}</label>
-      <input type="number" value="${THRESH[it.key]||''}" placeholder="ไม่แจ้ง" min="0"
-        onchange="THRESH['${it.key}']=parseFloat(this.value)||0;S.set('out_thresh',THRESH);renderItems()"/>
+      <input type="number" value="${THRESH[it.key]!=null?THRESH[it.key]:''}" placeholder="ไม่แจ้ง" min="0"
+        onchange="THRESH['${it.key}']=this.value===''?null:parseFloat(this.value);if(THRESH['${it.key}']===null)delete THRESH['${it.key}'];S.set('out_thresh',THRESH);renderItems();saveItems();"/>
       <span>${it.unit||'g'}</span>
     </div>`).join('');
 }
