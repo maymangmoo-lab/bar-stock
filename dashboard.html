@@ -430,7 +430,7 @@ function renderRawTable(el){
 }
 function exportRaw(){
   if(!rawCache.length) return;
-  const allItems=[...new Set(rawCache.flatMap(d=>Object.keys(d.items)))];
+  const allItems=[...rawCache].reverse().reduce((acc,d)=>{Object.keys(d.items).forEach(k=>{if(!acc.includes(k))acc.push(k);});return acc;},[]);
   const headers=['วันที่','พนักงาน',...allItems.flatMap(k=>[k+'_เข้า',k+'_ใช้',k+'_เหลือ'])];
   const rows=rawCache.map(d=>[thDate(d.date),d.staff,...allItems.flatMap(k=>{
     const it=d.items[k]; return it?[it.in??'',it.used??'',it.out??'']:['','',''];
@@ -504,7 +504,7 @@ async function loadCompare(){
         .then(r=>r.json()).then(j=>({period:p.label, totals:j.totals||{}}));
     }));
     cmpData = results;
-    const allItems=[...new Set(results.flatMap(r=>Object.keys(r.totals)))];
+    const allItems=[...results].reverse().reduce((acc,r)=>{Object.keys(r.totals).forEach(k=>{if(!acc.includes(k))acc.push(k);});return acc;},[]);
     if(!allItems.length){ el.innerHTML='<div class="empty">ไม่มีข้อมูล</div>'; return; }
     let html=`<div class="tbl-wrap"><table class="cmp-table">
       <tr><th>ช่วง</th>${allItems.map(k=>`<th>${k}</th>`).join('')}</tr>`;
