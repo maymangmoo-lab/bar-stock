@@ -407,11 +407,8 @@ async function loadRawData(){
 }
 function renderRawTable(el){
   if(!rawCache.length) return;
-  // เรียงคอลัมน์ตามลำดับที่กรอกครั้งแรก (row เก่าสุด)
-  const allItems = [...rawCache].reverse().reduce((acc,d)=>{
-    Object.keys(d.items).forEach(k=>{ if(!acc.includes(k)) acc.push(k); });
-    return acc;
-  },[]);
+  const allKeys=new Set(rawCache.flatMap(d=>Object.keys(d.items)));
+  const allItems=[...ITEMS.map(it=>it.key).filter(k=>allKeys.has(k)), ...[...allKeys].filter(k=>!ITEMS.map(it=>it.key).includes(k))];
   let html=`<div class="tbl-wrap"><table>
     <tr><th>วันที่</th><th>พนักงาน</th>${allItems.map(k=>`<th colspan="3">${k}</th>`).join('')}</tr>
     <tr><th></th><th></th>${allItems.map(()=>'<th>เข้า</th><th>ใช้</th><th>เหลือ</th>').join('')}</tr>`;
@@ -430,7 +427,8 @@ function renderRawTable(el){
 }
 function exportRaw(){
   if(!rawCache.length) return;
-  const allItems=[...rawCache].reverse().reduce((acc,d)=>{Object.keys(d.items).forEach(k=>{if(!acc.includes(k))acc.push(k);});return acc;},[]);
+  const allKeys=new Set(rawCache.flatMap(d=>Object.keys(d.items)));
+  const allItems=[...ITEMS.map(it=>it.key).filter(k=>allKeys.has(k)), ...[...allKeys].filter(k=>!ITEMS.map(it=>it.key).includes(k))];
   const headers=['วันที่','พนักงาน',...allItems.flatMap(k=>[k+'_เข้า',k+'_ใช้',k+'_เหลือ'])];
   const rows=rawCache.map(d=>[thDate(d.date),d.staff,...allItems.flatMap(k=>{
     const it=d.items[k]; return it?[it.in??'',it.used??'',it.out??'']:['','',''];
@@ -504,7 +502,8 @@ async function loadCompare(){
         .then(r=>r.json()).then(j=>({period:p.label, totals:j.totals||{}}));
     }));
     cmpData = results;
-    const allItems=[...results].reverse().reduce((acc,r)=>{Object.keys(r.totals).forEach(k=>{if(!acc.includes(k))acc.push(k);});return acc;},[]);
+    const allKeys=new Set(results.flatMap(r=>Object.keys(r.totals)));
+    const allItems=[...ITEMS.map(it=>it.key).filter(k=>allKeys.has(k)), ...[...allKeys].filter(k=>!ITEMS.map(it=>it.key).includes(k))];
     if(!allItems.length){ el.innerHTML='<div class="empty">ไม่มีข้อมูล</div>'; return; }
     let html=`<div class="tbl-wrap"><table class="cmp-table">
       <tr><th>ช่วง</th>${allItems.map(k=>`<th>${k}</th>`).join('')}</tr>`;
@@ -716,7 +715,9 @@ async function loadCost(){
     let totalCost = 0;
     let html=`<div class="tbl-wrap"><table>
       <tr><th>รายการ</th><th>ใช้ไป</th><th>หน่วย</th><th>ราคา/g</th><th>ต้นทุน (บาท)</th></tr>`;
-    Object.entries(totals).forEach(([item,data])=>{
+    const costKeys=new Set(Object.keys(totals));
+    const costItems=[...ITEMS.map(it=>it.key).filter(k=>costKeys.has(k)),...[...costKeys].filter(k=>!ITEMS.map(it=>it.key).includes(k))];
+    costItems.forEach(item=>{const data=totals[item];
       const price = PRICES[item];
       const cost = price ? data.used * price.pricePerG : null;
       if(cost!=null) totalCost += cost;
