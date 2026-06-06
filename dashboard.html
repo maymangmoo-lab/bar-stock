@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Dashboard — Bar Stock</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0e10;--surface:#18181b;--surface2:#232328;--surface3:#2d2d34;
+  --border:#35353f;--text:#f0f0f4;--muted:#7070808;--accent:#60a5fa;
+  --green:#34d399;--red:#f87171;--yellow:#fbbf24;--purple:#a78bfa;
+  --font:'IBM Plex Sans Thai',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+
+/* PIN SCREEN */
+#pin-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;gap:24px}
+.pin-title{font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+.pin-logo{font-size:28px;font-weight:600;color:var(--text);letter-spacing:-1px}
+.pin-logo span{color:var(--accent)}
+.pin-dots{display:flex;gap:12px;margin:8px 0}
+.pin-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border);transition:all .2s}
+.pin-dot.filled{background:var(--accent);border-color:var(--accent)}
+.pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px}
+.pin-key{height:56px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:18px;font-family:var(--mono);cursor:pointer;transition:all .15s}
+.pin-key:active{background:var(--surface3);transform:scale(.96)}
+.pin-key.del{font-size:14px;color:var(--muted)}
+.pin-err{font-size:12px;color:var(--red);height:16px;text-align:center}
+
+/* LAYOUT */
+#app{display:none;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:50}
+.topbar-logo{font-size:15px;font-weight:600;letter-spacing:-.5px}
+.topbar-logo span{color:var(--accent)}
+.bar-toggle{display:flex;gap:4px;margin-left:auto;background:var(--surface2);border-radius:8px;padding:3px}
+.bar-btn{padding:5px 14px;border-radius:6px;border:none;background:none;color:var(--muted);font-size:12px;font-family:var(--font);cursor:pointer;transition:all .15s}
+.bar-btn.on{background:var(--accent);color:#000;font-weight:600}
+.nav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{padding:12px 18px;border:none;background:none;color:var(--muted);font-size:12px;font-family:var(--font);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s}
+.nav-btn.on{color:var(--text);border-bottom-color:var(--accent)}
+.content{flex:1;padding:16px;max-width:100%}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.card-title{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:var(--surface2);border-radius:10px;padding:12px}
+.stat-label{font-size:10px;color:var(--muted);margin-bottom:4px}
+.stat-val{font-size:20px;font-weight:600;font-family:var(--mono)}
+.stat-val.green{color:var(--green)}
+.stat-val.red{color:var(--red)}
+.stat-val.yellow{color:var(--yellow)}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filter-label{font-size:11px;color:var(--muted)}
+input[type=date]{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;padding:6px 10px;font-family:var(--font)}
+select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;padding:6px 10px;font-family:var(--font);cursor:pointer}
+.btn{padding:8px 16px;border-radius:8px;border:none;font-size:12px;font-family:var(--font);cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--accent);color:#000;font-weight:600}
+.btn-primary:hover{opacity:.9}
+.btn-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{background:var(--surface3)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:600px}
+th{background:var(--surface2);color:var(--muted);font-weight:500;padding:8px 12px;text-align:left;position:sticky;top:0;white-space:nowrap;border-bottom:1px solid var(--border)}
+td{padding:8px 12px;border-bottom:1px solid var(--border);font-family:var(--mono);white-space:nowrap}
+tr:hover td{background:var(--surface2)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-green{background:#134e3a;color:var(--green)}
+.badge-red{background:#450a0a;color:var(--red)}
+.badge-yellow{background:#422006;color:var(--yellow)}
+
+/* CHART */
+.chart-wrap{position:relative;height:260px}
+.chart-controls{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.chart-type-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);font-size:11px;font-family:var(--font);cursor:pointer}
+.chart-type-btn.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600}
+
+/* COMPARE TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:12px}
+.cmp-table th{background:var(--surface2);color:var(--muted);font-weight:500;padding:8px 10px;text-align:right;border:1px solid var(--border)}
+.cmp-table th:first-child{text-align:left}
+.cmp-table td{padding:8px 10px;border:1px solid var(--border);font-family:var(--mono);text-align:right}
+.cmp-table td:first-child{text-align:left;color:var(--muted);font-family:var(--font)}
+.cmp-table tr:hover td{background:var(--surface2)}
+.period-sel{background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:11px;padding:4px 8px;font-family:var(--font)}
+
+/* LOW ALERT */
+.low-list{display:flex;flex-direction:column;gap:6px}
+.low-item{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border-radius:8px;padding:8px 12px}
+.low-item-name{font-size:13px}
+.low-item-val{font-size:12px;font-family:var(--mono);color:var(--red)}
+
+/* LOADING */
+.loading{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+.empty{text-align:center;padding:40px;color:var(--muted);font-size:13px}
+
+/* THRESHOLD EDITOR */
+.thresh-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.thresh-row input{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;padding:5px 8px;width:80px;font-family:var(--mono)}
+.thresh-row .sep{color:var(--muted);font-size:11px}
+.thresh-add{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;padding:4px 0}
+
+/* SECTION SEP */
+.section-sep{height:1px;background:var(--border);margin:16px 0}
+.section-title{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<!-- PIN -->
+<div id="pin-screen">
+  <div class="pin-logo">Bar<span>Stock</span></div>
+  <div class="pin-title">Admin Dashboard</div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="pd0"></div>
+    <div class="pin-dot" id="pd1"></div>
+    <div class="pin-dot" id="pd2"></div>
+    <div class="pin-dot" id="pd3"></div>
+    <div class="pin-dot" id="pd4"></div>
+    <div class="pin-dot" id="pd5"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key" onclick="pinKey('')"></button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-err" id="pin-err"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">Bar<span>Stock</span> Dashboard</div>
+    <div class="bar-toggle">
+      <button class="bar-btn on" id="bar-nam" onclick="setBar('น้ำ')">บาร์น้ำ</button>
+      <button class="bar-btn" id="bar-kha" onclick="setBar('ขนม')">บาร์ขนม</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn on" id="nav0" onclick="goPage(0)">📊 Overview</button>
+    <button class="nav-btn" id="nav1" onclick="goPage(1)">📋 Raw Data</button>
+    <button class="nav-btn" id="nav2" onclick="goPage(2)">📈 วิเคราะห์</button>
+    <button class="nav-btn" id="nav3" onclick="goPage(3)">💰 ต้นทุน</button>
+    <button class="nav-btn" id="nav4" onclick="goPage(4)">📦 Waste</button>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+const SCRIPT = 'https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec';
+const WORKER = 'https://restless-field-d96c.may-mangmoo.workers.dev';
+const PIN_KEY = 'dash_pin';
+const DEFAULT_PIN = '512514';
+
+let BAR = 'น้ำ';
+let PAGE = 0;
+let pinVal = '';
+let chartInst = null;
+let ITEMS = [];
+let PRICES = {};
+let RANGES = {};
+
+// ===== PIN =====
+function getPin(){ return localStorage.getItem(PIN_KEY)||DEFAULT_PIN; }
+function pinKey(k){
+  if(!k) return;
+  if(pinVal.length>=6) return;
+  pinVal += k;
+  updateDots();
+  if(pinVal.length===6) setTimeout(checkPin,150);
+}
+function pinDel(){
+  pinVal = pinVal.slice(0,-1);
+  updateDots();
+  document.getElementById('pin-err').textContent='';
+}
+function updateDots(){
+  for(let i=0;i<6;i++){
+    document.getElementById('pd'+i).classList.toggle('filled', i<pinVal.length);
+  }
+}
+function checkPin(){
+  if(pinVal===getPin()){
+    document.getElementById('pin-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    init();
+  } else {
+    document.getElementById('pin-err').textContent='PIN ไม่ถูกต้อง';
+    pinVal=''; updateDots();
+  }
+}
+
+// ===== INIT =====
+async function init(){
+  await loadItems();
+  await loadPrices();
+  await loadRanges();
+  goPage(0);
+}
+
+async function loadItems(){
+  try{
+    const sheet = BAR==='น้ำ' ? '' : 'รายการวัตถุดิบ (ขนม)';
+    const url = sheet
+      ? SCRIPT+'?action=getItems&sheet='+encodeURIComponent(sheet)
+      : SCRIPT+'?action=getItems';
+    const r = await fetch(url);
+    const j = await r.json();
+    ITEMS = j.items||[];
+  }catch(e){ ITEMS=[]; }
+}
+async function loadPrices(){
+  try{
+    const r = await fetch(SCRIPT+'?action=getPrice');
+    const j = await r.json();
+    PRICES = j.prices||{};
+  }catch(e){ PRICES={}; }
+}
+async function loadRanges(){
+  try{
+    const r = await fetch(SCRIPT+'?action=getThresholdRange&sheet='+(BAR==='ขนม'?'ขนม':''));
+    const j = await r.json();
+    RANGES = j.ranges||{};
+  }catch(e){ RANGES={}; }
+}
+
+// ===== BAR SWITCH =====
+async function setBar(bar){
+  BAR = bar;
+  document.getElementById('bar-nam').classList.toggle('on', bar==='น้ำ');
+  document.getElementById('bar-kha').classList.toggle('on', bar==='ขนม');
+  await loadItems();
+  await loadRanges();
+  goPage(PAGE);
+}
+
+// ===== NAV =====
+function goPage(n){
+  PAGE = n;
+  for(let i=0;i<5;i++) document.getElementById('nav'+i).classList.toggle('on', i===n);
+  const pages = [renderOverview, renderRawData, renderAnalyze, renderCost, renderWaste];
+  pages[n]();
+}
+
+// ===== UTILS =====
+function todayStr(){
+  const d=new Date();
+  return d.toISOString().split('T')[0];
+}
+function daysAgo(n){
+  const d=new Date();
+  d.setDate(d.getDate()-n);
+  return d.toISOString().split('T')[0];
+}
+function thDate(str){
+  if(!str) return '-';
+  const d=new Date(str);
+  if(isNaN(d)) return str;
+  return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+}
+function num(v){ return typeof v==='number'?v.toLocaleString('th'):'-'; }
+function csvExport(headers, rows, fname){
+  const bom='\uFEFF';
+  const csv=bom+[headers,...rows].map(r=>r.map(c=>'"'+(c??'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=fname; a.click();
+}
+
+// ===== PAGE 0: OVERVIEW =====
+async function renderOverview(){
+  const el=document.getElementById('content');
+  el.innerHTML='<div class="loading">⏳ กำลังโหลด...</div>';
+  try{
+    const sheetParam = BAR==='ขนม'?'ขนม':'';
+    const r = await fetch(SCRIPT+'?action=getEvening'+(sheetParam?'&sheet='+sheetParam:''));
+    const j = await r.json();
+    const prevOut = j.prevOut||{};
+    const todayIn = j.todayIn||{};
+
+    // หารายการต่ำกว่า threshold
+    const lowItems = ITEMS.filter(it=>{
+      const thresh = it.thresh;
+      if(thresh==null) return false;
+      const val = prevOut[it.key];
+      if(val==null) return false;
+      return val < thresh;
+    });
+
+    let html = '';
+
+    // Stat cards
+    html += `<div class="card">
+      <div class="card-title">สรุปวันนี้ — บาร์${BAR}</div>
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat-label">รายการทั้งหมด</div>
+          <div class="stat-val">${ITEMS.length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">ต่ำกว่าเกณฑ์</div>
+          <div class="stat-val ${lowItems.length>0?'red':'green'}">${lowItems.length}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">ของเข้าวันนี้</div>
+          <div class="stat-val ${Object.keys(todayIn).length>0?'green':'yellow'}">${Object.keys(todayIn).length} รายการ</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">ข้อมูลล่าสุด</div>
+          <div class="stat-val" style="font-size:13px">${j.prevDate?thDate(j.prevDate):'-'}</div>
+        </div>
+      </div>
+    </div>`;
+
+    // Low items
+    if(lowItems.length>0){
+      html += `<div class="card">
+        <div class="card-title">⚠️ รายการต่ำกว่าเกณฑ์</div>
+        <div class="low-list">`;
+      lowItems.forEach(it=>{
+        const val = prevOut[it.key]??'-';
+        html += `<div class="low-item">
+          <span class="low-item-name">${it.key}</span>
+          <span class="low-item-val">${typeof val==='number'?val.toLocaleString('th'):val} ${it.unit||'g'} / เกณฑ์ ${it.thresh.toLocaleString('th')}</span>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // ของเหลือล่าสุด
+    html += `<div class="card">
+      <div class="card-title">ของคงเหลือล่าสุด</div>
+      <div class="tbl-wrap"><table>
+        <tr><th>รายการ</th><th>เหลือ</th><th>หน่วย</th><th>เกณฑ์</th><th>สถานะ</th></tr>`;
+    ITEMS.forEach(it=>{
+      const val = prevOut[it.key];
+      const thresh = it.thresh;
+      const isLow = thresh!=null && val!=null && val<thresh;
+      const badge = val==null?'<span class="badge badge-yellow">ไม่มีข้อมูล</span>':
+        isLow?'<span class="badge badge-red">ต่ำ</span>':
+        '<span class="badge badge-green">ปกติ</span>';
+      html += `<tr>
+        <td>${it.key}</td>
+        <td>${val!=null?val.toLocaleString('th'):'-'}</td>
+        <td>${it.unit||'g'}</td>
+        <td>${thresh!=null?thresh.toLocaleString('th'):'-'}</td>
+        <td>${badge}</td>
+      </tr>`;
+    });
+    html += `</table></div></div>`;
+    el.innerHTML = html;
+  }catch(e){
+    el.innerHTML='<div class="empty">โหลดข้อมูลไม่สำเร็จ</div>';
+  }
+}
+
+// ===== PAGE 1: RAW DATA =====
+async function renderRawData(){
+  const el=document.getElementById('content');
+  el.innerHTML=`<div class="card">
+    <div class="card-title">Raw Data — บาร์${BAR}</div>
+    <div class="filters">
+      <span class="filter-label">จาก</span>
+      <input type="date" id="rd-from" value="${daysAgo(30)}">
+      <span class="filter-label">ถึง</span>
+      <input type="date" id="rd-to" value="${todayStr()}">
+      <button class="btn btn-primary" onclick="loadRawData()">โหลด</button>
+      <button class="btn btn-ghost" onclick="exportRaw()">Export CSV</button>
+    </div>
+    <div id="rd-result"><div class="empty">เลือกช่วงวันแล้วกดโหลด</div></div>
+  </div>`;
+}
+
+let rawCache = [];
+async function loadRawData(){
+  const from = document.getElementById('rd-from').value;
+  const to   = document.getElementById('rd-to').value;
+  const el   = document.getElementById('rd-result');
+  el.innerHTML='<div class="loading">⏳ กำลังโหลด...</div>';
+  try{
+    const sheet = BAR==='ขนม'?'ขนม':'';
+    const r = await fetch(SCRIPT+'?action=getDailyData&sheet='+sheet+'&dateFrom='+from+'&dateTo='+to);
+    const j = await r.json();
+    rawCache = j.data||[];
+    if(!rawCache.length){ el.innerHTML='<div class="empty">ไม่มีข้อมูลในช่วงนี้</div>'; return; }
+    renderRawTable(el);
+  }catch(e){
+    el.innerHTML='<div class="empty">โหลดไม่สำเร็จ</div>';
+  }
+}
+function renderRawTable(el){
+  if(!rawCache.length) return;
+  const allItems = [...new Set(rawCache.flatMap(d=>Object.keys(d.items)))];
+  let html=`<div class="tbl-wrap"><table>
+    <tr><th>วันที่</th><th>พนักงาน</th>${allItems.map(k=>`<th colspan="3">${k}</th>`).join('')}</tr>
+    <tr><th></th><th></th>${allItems.map(()=>'<th>เข้า</th><th>ใช้</th><th>เหลือ</th>').join('')}</tr>`;
+  rawCache.forEach(d=>{
+    html+=`<tr><td>${thDate(d.date)}</td><td style="font-family:var(--font)">${d.staff}</td>`;
+    allItems.forEach(k=>{
+      const it=d.items[k];
+      html+=it
+        ?`<td>${num(it.in)}</td><td>${num(it.used)}</td><td>${num(it.out)}</td>`
+        :`<td>-</td><td>-</td><td>-</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</table></div>';
+  el.innerHTML=html;
+}
+function exportRaw(){
+  if(!rawCache.length) return;
+  const allItems=[...new Set(rawCache.flatMap(d=>Object.keys(d.items)))];
+  const headers=['วันที่','พนักงาน',...allItems.flatMap(k=>[k+'_เข้า',k+'_ใช้',k+'_เหลือ'])];
+  const rows=rawCache.map(d=>[thDate(d.date),d.staff,...allItems.flatMap(k=>{
+    const it=d.items[k]; return it?[it.in??'',it.used??'',it.out??'']:['','',''];
+  })]);
+  csvExport(headers,rows,`rawdata_${BAR}_${todayStr()}.csv`);
+}
+
+// ===== PAGE 2: ANALYZE =====
+async function renderAnalyze(){
+  const el=document.getElementById('content');
+  const itemOpts = ITEMS.map(it=>`<option value="${it.key}">${it.key}</option>`).join('');
+  el.innerHTML=`
+  <div class="card">
+    <div class="card-title">ตารางเปรียบเทียบ — ใช้ไปต่อช่วงเวลา</div>
+    <div class="filters">
+      <span class="filter-label">วันอ้างอิง</span>
+      <input type="date" id="cmp-ref" value="${todayStr()}">
+      <button class="btn btn-primary" onclick="loadCompare()">โหลด</button>
+    </div>
+    <div id="cmp-result"><div class="empty">กดโหลดเพื่อดูข้อมูล</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">กราฟการใช้งาน</div>
+    <div class="filters">
+      <select id="chart-item">${itemOpts}</select>
+      <input type="date" id="chart-from" value="${daysAgo(30)}">
+      <input type="date" id="chart-to" value="${todayStr()}">
+      <button class="btn btn-primary" onclick="loadChart()">โหลด</button>
+    </div>
+    <div class="chart-controls">
+      <button class="chart-type-btn on" id="ct-scatter" onclick="setChartType('scatter')">จุด</button>
+      <button class="chart-type-btn" id="ct-line" onclick="setChartType('line')">เส้น</button>
+      <button class="chart-type-btn" id="ct-bar" onclick="setChartType('bar')">แท่ง</button>
+    </div>
+    <div class="chart-wrap"><canvas id="main-chart"></canvas></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">คำนวณสูตร — ตารางช่วง</div>
+    <div class="filters">
+      <select id="thresh-item">${itemOpts}</select>
+      <button class="btn btn-ghost" onclick="loadThreshCalc()">คำนวณ</button>
+    </div>
+    <div id="thresh-result"><div class="empty">เลือกรายการแล้วกดคำนวณ</div></div>
+    <div class="section-sep"></div>
+    <div class="section-title">ตั้งค่าตารางช่วง (Admin)</div>
+    <div id="thresh-editor"></div>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="addThreshRow()">+ เพิ่มช่วง</button>
+    <button class="btn btn-primary" style="margin-top:8px;margin-left:8px" onclick="saveThresh()">บันทึก</button>
+  </div>`;
+
+  renderThreshEditor();
+}
+
+// Compare table
+const PERIODS = [{label:'1 วัน',days:1},{label:'3 วัน',days:3},{label:'5 วัน',days:5},{label:'7 วัน',days:7},{label:'15 วัน',days:15},{label:'1 เดือน',days:30}];
+let cmpData = {};
+
+async function loadCompare(){
+  const ref = document.getElementById('cmp-ref').value;
+  const el  = document.getElementById('cmp-result');
+  el.innerHTML='<div class="loading">⏳ กำลังโหลด...</div>';
+  try{
+    const sheet = BAR==='ขนม'?'ขนม':'';
+    const results = await Promise.all(PERIODS.map(p=>{
+      const from = new Date(ref);
+      from.setDate(from.getDate()-p.days+1);
+      const fromStr = from.toISOString().split('T')[0];
+      return fetch(SCRIPT+'?action=getRangeData&sheet='+sheet+'&dateFrom='+fromStr+'&dateTo='+ref)
+        .then(r=>r.json()).then(j=>({period:p.label, totals:j.totals||{}}));
+    }));
+    cmpData = results;
+    const allItems=[...new Set(results.flatMap(r=>Object.keys(r.totals)))];
+    if(!allItems.length){ el.innerHTML='<div class="empty">ไม่มีข้อมูล</div>'; return; }
+    let html=`<div class="tbl-wrap"><table class="cmp-table">
+      <tr><th>ช่วง</th>${allItems.map(k=>`<th>${k}</th>`).join('')}</tr>`;
+    results.forEach(r=>{
+      html+=`<tr><td>${r.period}</td>${allItems.map(k=>{
+        const v=r.totals[k]; return `<td>${v?v.used.toLocaleString('th'):'-'}</td>`;
+      }).join('')}</tr>`;
+    });
+    html+='</table></div>';
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div class="empty">โหลดไม่สำเร็จ</div>';
+  }
+}
+
+// Chart
+let chartType = 'scatter';
+let chartRawData = [];
+
+function setChartType(t){
+  chartType=t;
+  ['scatter','line','bar'].forEach(x=>document.getElementById('ct-'+x).classList.toggle('on',x===t));
+  if(chartRawData.length) drawChart(chartRawData);
+}
+
+async function loadChart(){
+  const item = document.getElementById('chart-item').value;
+  const from = document.getElementById('chart-from').value;
+  const to   = document.getElementById('chart-to').value;
+  try{
+    const sheet = BAR==='ขนม'?'ขนม':'';
+    const r = await fetch(SCRIPT+'?action=getDailyData&sheet='+sheet+'&dateFrom='+from+'&dateTo='+to);
+    const j = await r.json();
+    chartRawData = (j.data||[]).filter(d=>d.items[item]).map(d=>({
+      date: d.date, used: d.items[item]?.used??0
+    }));
+    drawChart(chartRawData, item);
+  }catch(e){}
+}
+
+function drawChart(data, label=''){
+  if(chartInst){ chartInst.destroy(); chartInst=null; }
+  const ctx = document.getElementById('main-chart').getContext('2d');
+  const labels = data.map(d=>thDate(d.date));
+  const values = data.map(d=>d.used);
+
+  const datasets = [{
+    label: label||'ใช้ไป',
+    data: chartType==='scatter' ? data.map((d,i)=>({x:i,y:d.used})) : values,
+    backgroundColor: '#60a5fa88',
+    borderColor: '#60a5fa',
+    borderWidth: 2,
+    pointRadius: 5,
+    pointHoverRadius: 7,
+    fill: false,
+    tension: 0.3,
+  }];
+
+  chartInst = new Chart(ctx, {
+    type: chartType==='scatter'?'scatter':chartType,
+    data: chartType==='scatter' ? {datasets} : {labels, datasets},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#f0f0f4', font: { family: 'IBM Plex Sans Thai' } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = chartType==='scatter'?ctx.parsed.y:ctx.parsed.y;
+              return (label||'ใช้ไป')+': '+v.toLocaleString('th');
+            },
+            title: ctx => {
+              if(chartType==='scatter'){
+                const idx = ctx[0].parsed.x;
+                return labels[idx]||'';
+              }
+              return ctx[0].label;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#707080', font: { family: 'IBM Plex Mono', size: 10 } },
+          grid: { color: '#35353f' },
+          ...(chartType==='scatter'?{
+            type:'linear',
+            ticks: { callback: (v)=>labels[v]||'', color:'#707080' }
+          }:{})
+        },
+        y: {
+          ticks: { color: '#707080', font: { family: 'IBM Plex Mono', size: 10 } },
+          grid: { color: '#35353f' }
+        }
+      },
+      animation: { duration: 400 }
+    }
+  });
+
+  // ไม้บรรทัด crosshair
+  const crosshairPlugin = {
+    id: 'crosshair',
+    afterDraw(chart){
+      if(chart._crosshairX==null) return;
+      const {ctx, chartArea:{top,bottom}} = chart;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(chart._crosshairX, top);
+      ctx.lineTo(chart._crosshairX, bottom);
+      ctx.strokeStyle='rgba(255,255,255,0.3)';
+      ctx.lineWidth=1;
+      ctx.setLineDash([4,4]);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
+  chartInst.options.plugins.crosshair = {};
+  chartInst.canvas.addEventListener('mousemove', e=>{
+    const rect = chartInst.canvas.getBoundingClientRect();
+    chartInst._crosshairX = e.clientX - rect.left;
+    chartInst.draw();
+  });
+  chartInst.canvas.addEventListener('mouseleave', ()=>{
+    chartInst._crosshairX = null;
+    chartInst.draw();
+  });
+}
+
+// Threshold calc
+async function loadThreshCalc(){
+  const item = document.getElementById('thresh-item').value;
+  const el   = document.getElementById('thresh-result');
+  const sheetParam = BAR==='ขนม'?'ขนม':'';
+  const r2 = await fetch(SCRIPT+'?action=getTodayIn&sheet='+(BAR==='ขนม'?'บาร์ขนม (เหลือ)':'บาร์น้ำ (เหลือ)')+'&type=out');
+  const j2 = await r2.json();
+  const current = j2.items?.[item];
+  const ranges  = RANGES[item]||[];
+  if(!ranges.length){ el.innerHTML='<div class="empty">ยังไม่มีตารางช่วงสำหรับรายการนี้</div>'; return; }
+  if(current==null){ el.innerHTML='<div class="empty">ไม่มีข้อมูลของเหลือปัจจุบัน</div>'; return; }
+  const match = ranges.find(r=>current>=r.low && current<r.high);
+  const unit = ITEMS.find(it=>it.key===item)?.unit||'g';
+  el.innerHTML=`<div class="stat-grid">
+    <div class="stat"><div class="stat-label">เหลืออยู่</div><div class="stat-val">${current.toLocaleString('th')} ${unit}</div></div>
+    <div class="stat"><div class="stat-label">ทำได้ประมาณ</div><div class="stat-val ${match?'green':'red'}">${match?match.portions+' สูตร':'ไม่อยู่ในช่วง'}</div></div>
+  </div>
+  ${match?`<div style="font-size:12px;color:var(--muted);margin-top:8px">อยู่ในช่วง ${match.low.toLocaleString('th')} – ${match.high.toLocaleString('th')} ${unit}</div>`:''}`;
+}
+
+// Threshold editor
+let threshRows = [];
+function renderThreshEditor(){
+  const item = document.getElementById('thresh-item')?.value;
+  if(!item) return;
+  threshRows = (RANGES[item]||[]).map(r=>({...r}));
+  if(!threshRows.length) threshRows = [{low:0,high:0,portions:0,note:''}];
+  drawThreshEditor();
+}
+function drawThreshEditor(){
+  const el=document.getElementById('thresh-editor');
+  el.innerHTML=threshRows.map((r,i)=>`
+    <div class="thresh-row">
+      <input type="number" value="${r.low}" oninput="threshRows[${i}].low=+this.value" placeholder="ต่ำ">
+      <span class="sep">–</span>
+      <input type="number" value="${r.high}" oninput="threshRows[${i}].high=+this.value" placeholder="สูง">
+      <span class="sep">=</span>
+      <input type="number" step="0.5" value="${r.portions}" oninput="threshRows[${i}].portions=+this.value" placeholder="สูตร" style="width:60px">
+      <span class="sep">สูตร</span>
+      <button onclick="threshRows.splice(${i},1);drawThreshEditor()" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+    </div>`).join('');
+}
+function addThreshRow(){ threshRows.push({low:0,high:0,portions:0,note:''}); drawThreshEditor(); }
+async function saveThresh(){
+  const item = document.getElementById('thresh-item').value;
+  const sheet = BAR==='ขนม'?'ขนม':'';
+  try{
+    await fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'saveThresholdRange',sheet,items:threshRows.map(r=>({...r,ingredient:item}))})});
+    await loadRanges();
+    alert('บันทึกสำเร็จ');
+  }catch(e){ alert('บันทึกไม่สำเร็จ'); }
+}
+
+// ===== PAGE 3: COST =====
+async function renderCost(){
+  const el=document.getElementById('content');
+  el.innerHTML=`<div class="card">
+    <div class="card-title">ต้นทุน — บาร์${BAR}</div>
+    <div class="filters">
+      <span class="filter-label">จาก</span>
+      <input type="date" id="cost-from" value="${daysAgo(30)}">
+      <span class="filter-label">ถึง</span>
+      <input type="date" id="cost-to" value="${todayStr()}">
+      <button class="btn btn-primary" onclick="loadCost()">โหลด</button>
+    </div>
+    <div id="cost-result"><div class="empty">เลือกช่วงวันแล้วกดโหลด</div></div>
+  </div>`;
+}
+
+async function loadCost(){
+  const from = document.getElementById('cost-from').value;
+  const to   = document.getElementById('cost-to').value;
+  const el   = document.getElementById('cost-result');
+  el.innerHTML='<div class="loading">⏳ กำลังโหลด...</div>';
+  try{
+    const sheet = BAR==='ขนม'?'ขนม':'';
+    const r = await fetch(SCRIPT+'?action=getRangeData&sheet='+sheet+'&dateFrom='+from+'&dateTo='+to);
+    const j = await r.json();
+    const totals = j.totals||{};
+    let totalCost = 0;
+    let html=`<div class="tbl-wrap"><table>
+      <tr><th>รายการ</th><th>ใช้ไป</th><th>หน่วย</th><th>ราคา/g</th><th>ต้นทุน (บาท)</th></tr>`;
+    Object.entries(totals).forEach(([item,data])=>{
+      const price = PRICES[item];
+      const cost = price ? data.used * price.pricePerG : null;
+      if(cost!=null) totalCost += cost;
+      html+=`<tr>
+        <td style="font-family:var(--font)">${item}</td>
+        <td>${data.used.toLocaleString('th')}</td>
+        <td>${data.unit}</td>
+        <td>${price?price.pricePerG.toFixed(3):'-'}</td>
+        <td>${cost!=null?cost.toFixed(2):'-'}</td>
+      </tr>`;
+    });
+    html+=`</table></div>
+    <div style="text-align:right;margin-top:12px;font-size:14px;font-weight:600">
+      รวมต้นทุน: <span style="color:var(--yellow);font-family:var(--mono)">${totalCost.toFixed(2)} บาท</span>
+    </div>`;
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div class="empty">โหลดไม่สำเร็จ</div>';
+  }
+}
+
+// ===== PAGE 4: WASTE =====
+async function renderWaste(){
+  const el=document.getElementById('content');
+  el.innerHTML=`<div class="card">
+    <div class="card-title">Waste — บาร์${BAR}</div>
+    <div class="filters">
+      <span class="filter-label">จาก</span>
+      <input type="date" id="waste-from" value="${daysAgo(30)}">
+      <span class="filter-label">ถึง</span>
+      <input type="date" id="waste-to" value="${todayStr()}">
+      <button class="btn btn-primary" onclick="loadWaste()">โหลด</button>
+    </div>
+    <div id="waste-result"><div class="empty">เลือกช่วงวันแล้วกดโหลด</div></div>
+  </div>`;
+}
+
+async function loadWaste(){
+  const from = document.getElementById('waste-from').value;
+  const to   = document.getElementById('waste-to').value;
+  const el   = document.getElementById('waste-result');
+  el.innerHTML='<div class="loading">⏳ กำลังโหลด...</div>';
+  try{
+    const bar = BAR==='ขนม'?'ขนม':'น้ำ';
+    const r = await fetch(SCRIPT+'?action=getWaste&bar='+encodeURIComponent(bar)+'&dateFrom='+from+'&dateTo='+to);
+    const j = await r.json();
+    const waste = j.waste||[];
+    if(!waste.length){ el.innerHTML='<div class="empty">ไม่มีข้อมูล Waste</div>'; return; }
+
+    // สรุปรวม
+    const summary={};
+    let totalWasteCost=0;
+    waste.forEach(w=>{
+      if(!summary[w.ingredient]) summary[w.ingredient]={amount:0,unit:'g'};
+      summary[w.ingredient].amount += w.amount;
+      const price=PRICES[w.ingredient];
+      if(price) totalWasteCost += w.amount * price.pricePerG;
+    });
+
+    let html=`<div class="stat-grid" style="margin-bottom:12px">
+      <div class="stat"><div class="stat-label">รายการ Waste</div><div class="stat-val red">${waste.length}</div></div>
+      <div class="stat"><div class="stat-label">มูลค่า Waste</div><div class="stat-val red">${totalWasteCost.toFixed(2)} บาท</div></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <tr><th>วันที่บันทึก</th><th>วันที่เตรียม</th><th>พนักงาน</th><th>วัตถุดิบ</th><th>ปริมาณ</th><th>ประเภท</th><th>หมายเหตุ</th></tr>`;
+    waste.forEach(w=>{
+      html+=`<tr>
+        <td>${thDate(w.date)}</td>
+        <td>${thDate(w.datePrepared)}</td>
+        <td style="font-family:var(--font)">${w.staff}</td>
+        <td style="font-family:var(--font)">${w.ingredient}</td>
+        <td>${w.amount.toLocaleString('th')} g</td>
+        <td><span class="badge ${w.type==='หมดอายุ'?'badge-red':w.type==='ผลิตเกิน'?'badge-yellow':'badge-green'}">${w.type}</span></td>
+        <td style="font-family:var(--font);color:var(--muted)">${w.note||'-'}</td>
+      </tr>`;
+    });
+    html+='</table></div>';
+    el.innerHTML=html;
+  }catch(e){
+    el.innerHTML='<div class="empty">โหลดไม่สำเร็จ</div>';
+  }
+}
+</script>
+</body>
+</html>
