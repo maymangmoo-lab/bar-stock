@@ -532,18 +532,18 @@ async function doSend(){
     }
   }
 
-  // save history & update draft
+  // save history locally (for fallback)
   HISTORY.unshift({date:dateStr,dk:todayKey(),staff:pendStaff,data:pendData});
   if(HISTORY.length>60) HISTORY=HISTORY.slice(0,60);
   S.set('in_hist',HISTORY);
-  pendData.forEach(d=>{DRAFT[d.item]=d.val;});
-  S.set('in_draft_'+todayKey(),DRAFT);
+  // ล้าง localStorage draft
+  localStorage.removeItem('in_draft_'+todayKey());
 
   closeOv();
   const msg2=ok?'✅ ส่งข้อมูลสำเร็จ — ข้อมูลถึง Google Sheet แล้ว'
     :URL_?'⚠️ บันทึกในเครื่องแล้ว แต่ส่ง Sheet ไม่สำเร็จ':'✅ บันทึกในเครื่องแล้ว';
-  showAlert(ok?'ok':'warn', msg2+'\nค่าที่ส่งไปแล้วแสดงอยู่ในช่อง');
-  checkSentToday();
+  showAlert(ok?'ok':'warn', msg2);
+  if(ok) await fetchTodayIn();
   btn.disabled=false; btn.textContent='บันทึก ✓';
   pendData=[]; pendStaff='';
 }

@@ -657,17 +657,14 @@ async function doSend(){
   HISTORY.unshift({date:dateStr,dk:todayKey(),staff:pendStaff,data:pendData});
   if(HISTORY.length>60) HISTORY=HISTORY.slice(0,60);
   S.set('kn_out_hist',HISTORY);
-
-  // อัปเดต prevOut สำหรับกรอกครั้งที่ 2
-  pendData.forEach(d=>{prevOut[d.item]=d.out; DRAFT[d.item]=d.out;});
-  S.set('kn_out_draft_'+todayKey(),DRAFT);
+  // ล้าง localStorage draft
+  localStorage.removeItem('kn_out_draft_'+todayKey());
 
   closeOv();
   const msg2=ok?'✅ ส่งข้อมูลสำเร็จ — ข้อมูลถึง Google Sheet แล้ว'
     :URL_?'⚠️ บันทึกในเครื่องแล้ว แต่ส่ง Sheet ไม่สำเร็จ':'✅ บันทึกในเครื่องแล้ว';
-  showAlert(ok?'ok':'warn',msg2+'\nค่าที่ส่งไปแล้วแสดงอยู่ในช่อง');
-  checkSentToday();
-  renderItems();
+  showAlert(ok?'ok':'warn',msg2);
+  if(ok) await fetchPrev();
   btn.disabled=false; btn.textContent='ส่งข้อมูล ✓';
   pendData=[]; pendStaff='';
 }
