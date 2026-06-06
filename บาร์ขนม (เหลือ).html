@@ -419,22 +419,19 @@ async function fetchPrev(){
   el.className='sheet-status info';
   el.textContent='⏳ กำลังดึงข้อมูลจาก Sheet...';
   try{
-    // ดึงข้อมูลเย็น (เหลือ/เข้าวันนี้)
     const [r1, r2] = await Promise.all([
-      fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getEvening&sheet='+encodeURIComponent('บาร์ขนม (เหลือ)')),
-      fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getTodayIn&sheet='+encodeURIComponent('บาร์ขนม (เหลือ)'))
+      fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getEvening&sheet=ขนม'),
+      fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getTodayIn&sheet='+encodeURIComponent('บาร์ขนม (เหลือ)')+'&type=out')
     ]);
     const j1=await r1.json();
     const j2=await r2.json();
     prevOut=j1.prevOut||{}; todayIn=j1.todayIn||{};
     prevDate=j1.prevDate||''; todayInDate=j1.todayInDate||'';
-    // โหลด draft จาก Sheet
     if(j2.sent && j2.items && Object.keys(j2.items).length){
       DRAFT=j2.items;
     } else {
       DRAFT={};
     }
-    // แจ้งส่งแล้ว
     const sw=document.getElementById('sent-warn');
     if(j2.sent && j2.staff){
       sw.style.display='block';
@@ -448,7 +445,7 @@ async function fetchPrev(){
   }catch(e){
     prevOut={}; todayIn={};
     el.className='sheet-status warn';
-    el.textContent='⚠️ ดึงข้อมูลไม่สำเร็จ — ตรวจสอบ URL หรืออินเทอร์เน็ต';
+    el.textContent='⚠️ ดึงข้อมูลไม่สำเร็จ';
     DRAFT={};
   }
   renderItems();
