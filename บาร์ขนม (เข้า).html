@@ -631,7 +631,6 @@ async function fetchStaff(){
     const j=await r.json();
     if(j.staff&&j.staff.length){
       STAFF=j.staff;
-      S.set('kn_in_staff',STAFF);
       if(typeof renderStaffTags==='function') renderStaffTags();
     }
   }catch(e){}
