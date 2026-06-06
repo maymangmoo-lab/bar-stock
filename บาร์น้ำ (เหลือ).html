@@ -65,6 +65,7 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 .rname{font-size:14px;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
 .hint{font-size:10px;color:#666;padding-left:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hint.low{color:#c04040}
+.hint.negative{color:#e05050}
 .rright{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .rinput{width:120px;text-align:right;font-size:16px;padding:9px 12px;border:1px solid #484848;border-radius:8px;background:#3a3a3c;color:#f5f5f5}
 .rinput:focus{outline:none;border-color:#686868;background:#444}
@@ -485,7 +486,8 @@ function renderItems(){
     const dotCls=isLow?'dot low':done?'dot on':'dot';
     const inpCls=isLow?'rinput low':done?'rinput on':'rinput';
     const unitCls=isLow?'runit low':'runit';
-    const hintCls=isLow?'hint low':'hint';
+    const isNeg=done&&used!=null&&used<0;
+    const hintCls=isLow?'hint low':isNeg?'hint negative':'hint';
 
     return`<div class="row${isLow?' is-low':''}" id="row${i}">
       <div class="rleft">
@@ -536,7 +538,8 @@ function onInp(i){
   if(total!=null) hintText='เหลือ '+total.toLocaleString('th')+' '+(it.unit||'g');
   if(done&&used!=null) hintText+=' · ใช้ '+used.toLocaleString('th')+' '+(it.unit||'g');
   const hintEl=document.getElementById('hint'+i);
-  hintEl.className=isLow?'hint low':'hint';
+  const isNeg=done&&used!=null&&used<0;
+  hintEl.className=isLow?'hint low':isNeg?'hint negative':'hint';
   hintEl.textContent=hintText;
 
   updateProg();
