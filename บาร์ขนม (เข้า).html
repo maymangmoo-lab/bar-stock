@@ -447,6 +447,31 @@ function selectStaff(name){
 }
 function closeSP(){document.getElementById('sp-ov').classList.remove('on');}
 
+
+async function fetchTodayIn(){
+  try{
+    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getTodayIn&sheet='+encodeURIComponent('บาร์ขนม (เข้า)'));
+    const j=await r.json();
+    // โหลด draft จาก Sheet
+    if(j.sent && j.items && Object.keys(j.items).length){
+      DRAFT=j.items;
+    } else {
+      DRAFT={};
+    }
+    // แจ้งว่าวันนี้ส่งแล้ว
+    const el=document.getElementById('sent-warn');
+    if(j.sent && j.staff){
+      el.style.display='block';
+      el.textContent='⚠️ วันนี้ส่งข้อมูลไปแล้ว (โดย '+j.staff+') — กรอกเพิ่มได้ถ้าต้องการ';
+    } else {
+      el.style.display='none';
+    }
+  }catch(e){
+    DRAFT={};
+  }
+  renderItems();
+  checkReady();
+}
 function checkSentToday(){
   const sent=HISTORY.find(h=>h.dk===todayKey());
   const el=document.getElementById('sent-warn');

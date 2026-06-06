@@ -383,13 +383,10 @@ let pendData=[], pendStaff='';
 
 // INIT
 async function init(){
-  autoClear();
-  DRAFT=S.get('kn_out_draft_'+todayKey(),{});
   setDate();
   await fetchItems();
   await fetchStaff();
-  checkSentToday();
-  fetchPrev();
+  await fetchPrev();
 }
 
 function setDate(){
@@ -416,16 +413,33 @@ async function fetchPrev(){
   const el=document.getElementById('sheet-status');
   if(!URL_){
     el.className='sheet-status warn';
-    el.textContent='⚠️ ยังไม่ได้ตั้งค่า URL — ช่อง "ใช้ไป" จะไม่แสดง';
+    el.textContent='⚠️ ยังไม่ได้ตั้งค่า URL';
     renderItems(); return;
   }
   el.className='sheet-status info';
-  el.textContent='⏳ กำลังดึงข้อมูลจาก Google Sheet...';
+  el.textContent='⏳ กำลังดึงข้อมูลจาก Sheet...';
   try{
-    const r=await fetch(URL_+'?action=getEvening');
-    const j=await r.json();
-    prevOut=j.prevOut||{}; todayIn=j.todayIn||{};
-    prevDate=j.prevDate||''; todayInDate=j.todayInDate||'';
+    // ดึงข้อมูลเย็น (เหลือ/เข้าวันนี้)
+    const [r1, r2] = await Promise.all([
+      fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getEvening&sheet='+encodeURIComponent('บาร์ขนม (เหลือ)')),
+      fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getTodayIn&sheet='+encodeURIComponent('บาร์ขนม (เหลือ)'))
+    ]);
+    const j1=await r1.json();
+    const j2=await r2.json();
+    prevOut=j1.prevOut||{}; todayIn=j1.todayIn||{};
+    prevDate=j1.prevDate||''; todayInDate=j1.todayInDate||'';
+    // โหลด draft จาก Sheet
+    if(j2.sent && j2.items && Object.keys(j2.items).length){
+      DRAFT=j2.items;
+    } else {
+      DRAFT={};
+    }
+    // แจ้งส่งแล้ว
+    const sw=document.getElementById('sent-warn');
+    if(j2.sent && j2.staff){
+      sw.style.display='block';
+      sw.textContent='⚠️ วันนี้ส่งข้อมูลไปแล้ว (โดย '+j2.staff+') — กรอกเพิ่มได้ถ้าต้องการ';
+    } else sw.style.display='none';
     let msg='✅ โหลดข้อมูลสำเร็จ';
     if(prevDate) msg+='\n• เหลือเมื่อวาน: '+prevDate;
     if(todayInDate) msg+='\n• ของเข้าวันนี้: '+todayInDate;
@@ -435,6 +449,7 @@ async function fetchPrev(){
     prevOut={}; todayIn={};
     el.className='sheet-status warn';
     el.textContent='⚠️ ดึงข้อมูลไม่สำเร็จ — ตรวจสอบ URL หรืออินเทอร์เน็ต';
+    DRAFT={};
   }
   renderItems();
 }
