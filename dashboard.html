@@ -749,17 +749,46 @@ function renderThreshTable(){
   const tbody = document.getElementById('az3-body');
   if(!tbody) return;
   tbody.innerHTML = AZ.threshRows.map((r,i)=>{
-    const afterMax = r.high + (r.portions * recipe);
-    const afterMin = r.low  + (r.portions * recipe);
-    return `<tr>
-      <td><input type="number" value="${r.low}" oninput="AZ.threshRows[${i}].low=+this.value;renderThreshTable()" style="width:90px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px"></td>
-      <td><input type="number" value="${r.high}" oninput="AZ.threshRows[${i}].high=+this.value;renderThreshTable()" style="width:90px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px"></td>
-      <td><input type="number" step="0.5" value="${r.portions}" oninput="AZ.threshRows[${i}].portions=+this.value;renderThreshTable()" style="width:80px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px"></td>
-      <td style="font-family:var(--mono);color:var(--green)">${recipe?Math.round(afterMax).toLocaleString('th'):'-'}</td>
-      <td style="font-family:var(--mono);color:var(--yellow)">${recipe?Math.round(afterMin).toLocaleString('th'):'-'}</td>
+    const afterMax = (r.high||0) + ((r.portions||0) * recipe);
+    const afterMin = (r.low||0)  + ((r.portions||0) * recipe);
+    return `<tr id="trow${i}">
+      <td><input type="number" id="tlow${i}" value="${r.low}" step="any"
+        onblur="AZ.threshRows[${i}].low=+this.value;recalcThreshRow(${i})"
+        style="width:90px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px;font-family:var(--mono)"></td>
+      <td><input type="number" id="thigh${i}" value="${r.high}" step="any"
+        onblur="AZ.threshRows[${i}].high=+this.value;recalcThreshRow(${i});autoFillNextMin(${i})"
+        style="width:90px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px;font-family:var(--mono)"></td>
+      <td><input type="number" id="tpor${i}" value="${r.portions}" step="0.1"
+        onblur="AZ.threshRows[${i}].portions=+this.value;recalcThreshRow(${i})"
+        style="width:80px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:4px 8px;font-size:12px;font-family:var(--mono)"></td>
+      <td id="tamax${i}" style="font-family:var(--mono);color:var(--green)">${recipe?Math.round(afterMax).toLocaleString('th'):'-'}</td>
+      <td id="tamin${i}" style="font-family:var(--mono);color:var(--yellow)">${recipe?Math.round(afterMin).toLocaleString('th'):'-'}</td>
       <td><button onclick="AZ.threshRows.splice(${i},1);renderThreshTable()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px">✕</button></td>
     </tr>`;
   }).join('');
+}
+
+
+function autoFillNextMin(i){
+  const nextLow = document.getElementById('tlow'+(i+1));
+  if(nextLow && !nextLow.value){
+    nextLow.value = AZ.threshRows[i].high;
+    AZ.threshRows[i+1].low = AZ.threshRows[i].high;
+    recalcThreshRow(i+1);
+  }
+}
+
+function recalcThreshRow(i){
+  AZ.threshRows[i].low     = parseFloat(document.getElementById('tlow'+i)?.value)||0;
+  AZ.threshRows[i].high    = parseFloat(document.getElementById('thigh'+i)?.value)||0;
+  AZ.threshRows[i].portions= parseFloat(document.getElementById('tpor'+i)?.value)||0;
+  const recipe = parseFloat(document.getElementById('az3-recipe')?.value)||AZ.recipeAmount||0;
+  const afterMax = AZ.threshRows[i].high + (AZ.threshRows[i].portions * recipe);
+  const afterMin = AZ.threshRows[i].low  + (AZ.threshRows[i].portions * recipe);
+  const maxEl = document.getElementById('tamax'+i);
+  const minEl = document.getElementById('tamin'+i);
+  if(maxEl) maxEl.textContent = recipe?Math.round(afterMax).toLocaleString('th'):'-';
+  if(minEl) minEl.textContent = recipe?Math.round(afterMin).toLocaleString('th'):'-';
 }
 
 function addThreshRow3(){
