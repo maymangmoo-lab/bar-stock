@@ -565,6 +565,29 @@ function showAlert(type,msg){
 }
 
 // ── HISTORY ──
+
+async function fetchHistory(){
+  const el=document.getElementById('hlist');
+  el.innerHTML='<div class="empty">⏳ กำลังโหลด...</div>';
+  try{
+    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getHistory&sheet='+encodeURIComponent('บาร์น้ำ (เข้า)'));
+    const j=await r.json();
+    if(!j.history||!j.history.length){
+      el.innerHTML='<div class="empty">ยังไม่มีข้อมูล</div>';
+      return;
+    }
+    el.innerHTML=j.history.map(h=>`
+    <div class="hcard">
+      <div class="hhdr"><span class="hdate">${h.date}</span><span class="hstaff">${h.staff}</span></div>
+      <table class="htbl">
+        <tr><th>รายการ</th><th>เข้า</th></tr>
+        ${h.data.map(d=>`<tr><td>${d.item}</td><td>${Number(d.val).toLocaleString()} ${d.unit}</td></tr>`).join('')}
+      </table>
+    </div>`).join('');
+  }catch(e){
+    el.innerHTML='<div class="empty">โหลดไม่สำเร็จ</div>';
+  }
+}
 function renderHistory(){
   const el=document.getElementById('hlist');
   if(!HISTORY.length){el.innerHTML='<div class="empty">ยังไม่มีข้อมูล</div>';return;}
@@ -585,7 +608,7 @@ function goTab(n){
     document.getElementById('p'+i).classList.toggle('on',i===n);
     document.getElementById('t'+i).classList.toggle('on',i===n);
   });
-  if(n===1) renderHistory();
+  if(n===1) fetchHistory();
 }
 
 // ── SETTINGS ──
