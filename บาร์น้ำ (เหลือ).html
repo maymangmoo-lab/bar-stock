@@ -686,7 +686,7 @@ async function fetchHistory(){
   const el=document.getElementById('hlist');
   el.innerHTML='<div class="empty">⏳ กำลังโหลด...</div>';
   try{
-    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getHistory&sheet='+encodeURIComponent('บาร์น้ำ (เหลือ)'));
+    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getHistory&sheet='+encodeURIComponent('บาร์น้ำ (เหลือ)')+'&type=out');
     const j=await r.json();
     if(!j.history||!j.history.length){
       el.innerHTML='<div class="empty">ยังไม่มีข้อมูล</div>';
