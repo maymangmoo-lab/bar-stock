@@ -46,6 +46,13 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 .alert.ok{background:#1a2e1a;color:#5cb85c;border-color:#2a6b2a;display:block}
 .alert.err{background:#2e1a1a;color:#e05050;border-color:#6b1f1f;display:block}
 .alert.warn{background:#2e2010;color:#e09030;border-color:#6b4010;display:block}
+.neg-popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
+.neg-popup.show{display:flex}
+.neg-box{background:#2c2c2e;border-radius:16px;padding:24px;width:90%;max-width:340px;border:1px solid #e05050}
+.neg-title{font-size:15px;font-weight:600;color:#e05050;margin-bottom:12px}
+.neg-list{font-size:13px;color:#f0f0f0;margin-bottom:8px;line-height:1.8}
+.neg-msg{font-size:12px;color:#aaa;margin-bottom:16px}
+.neg-btn{width:100%;padding:12px;background:#e05050;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:'Sarabun',sans-serif}
 .sent-warn{display:none;margin:10px 18px 0;padding:9px 12px;background:#2e2010;border:1px solid #6b400f;border-radius:8px;font-size:12px;color:#e09030;line-height:1.5;flex-shrink:0}
 
 /* PAGES */
@@ -578,7 +585,42 @@ function checkSentToday(){
 }
 
 // CONFIRM
-function showOv(){
+
+function closeNegPopup(){
+  document.getElementById('neg-popup').classList.remove('show');
+  goTab(0);
+}
+
+async function checkNegativeBeforeSend(){
+  // ดึง getActualUsed เพื่อคำนวณใช้ไปจริง
+  try{
+    const r = await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getActualUsed&sheet=&dateFrom='+todayKey()+'&dateTo='+todayKey());
+    const j = await r.json();
+    if(!j.data||!j.data.length) return true; // ไม่มีข้อมูลเดิม ผ่านได้
+
+    const latestRound = j.data[j.data.length-1];
+    const negItems = [];
+    ITEMS.forEach(it=>{
+      const d = latestRound.items[it.key];
+      if(d && d.used!=null && d.used<0){
+        negItems.push(`${it.key}: ใช้ไป ${d.used.toLocaleString('th')} ${it.unit||'g'}`);
+      }
+    });
+
+    if(negItems.length){
+      document.getElementById('neg-list').innerHTML = negItems.map(s=>`<div>• ${s}</div>`).join('');
+      document.getElementById('neg-popup').classList.add('show');
+      return false;
+    }
+    return true;
+  }catch(e){
+    return true; // ถ้าดึงไม่ได้ให้ผ่าน
+  }
+}
+
+async function showOv(){
+  const ok = await checkNegativeBeforeSend();
+  if(!ok) return;
   if(!curStaff){showAlert('err','กรุณาเลือกชื่อพนักงานก่อน');return;}
   const all=ITEMS.map(it=>{
     const outVal=DRAFT[it.key]!=null?DRAFT[it.key]:null;
