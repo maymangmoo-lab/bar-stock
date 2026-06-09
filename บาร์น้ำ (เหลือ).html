@@ -591,35 +591,28 @@ function closeNegPopup(){
   goTab(0);
 }
 
-async function checkNegativeBeforeSend(){
-  // ดึง getActualUsed เพื่อคำนวณใช้ไปจริง
-  try{
-    const r = await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getActualUsed&sheet=&dateFrom='+todayKey()+'&dateTo='+todayKey());
-    const j = await r.json();
-    if(!j.data||!j.data.length) return true; // ไม่มีข้อมูลเดิม ผ่านได้
-
-    const latestRound = j.data[j.data.length-1];
-    const negItems = [];
-    ITEMS.forEach(it=>{
-      const d = latestRound.items[it.key];
-      if(d && d.used!=null && d.used<0){
-        negItems.push(`${it.key}: ใช้ไป ${d.used.toLocaleString('th')} ${it.unit||'g'}`);
-      }
-    });
-
-    if(negItems.length){
-      document.getElementById('neg-list').innerHTML = negItems.map(s=>`<div>• ${s}</div>`).join('');
-      document.getElementById('neg-popup').classList.add('show');
-      return false;
+function checkNegativeBeforeSend(){
+  const negItems = [];
+  ITEMS.forEach(it=>{
+    const outVal = DRAFT[it.key];
+    if(outVal == null) return; // ยังไม่ได้กรอก ข้ามไป
+    const used = calcUsed(it.key, outVal);
+    if(used != null && used < 0){
+      negItems.push(`${it.key}: ใช้ไป ${used.toLocaleString('th')} ${it.unit||'g'}`);
     }
-    return true;
-  }catch(e){
-    return true; // ถ้าดึงไม่ได้ให้ผ่าน
+  });
+
+  if(negItems.length){
+    document.getElementById('neg-list').innerHTML = negItems.map(s=>`<div>• ${s}</div>`).join('');
+    document.getElementById('neg-popup').classList.add('show');
+    return false;
   }
+  return true;
 }
 
+
 async function showOv(){
-  const ok = await checkNegativeBeforeSend();
+  const ok = checkNegativeBeforeSend();
   if(!ok) return;
   if(!curStaff){showAlert('err','กรุณาเลือกชื่อพนักงานก่อน');return;}
   const all=ITEMS.map(it=>{
