@@ -370,7 +370,7 @@ body{font-family:'Sarabun',sans-serif;background:#1c1c1e;color:#f5f5f5;display:f
 
   // ── ค่าที่ฝังไว้ตายตัว (ไม่ต้องตั้งค่าบนเครื่อง) ──
   (function() {
-    if (!localStorage.getItem('out_url')) localStorage.setItem('out_url', 'https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec');
+    if (!localStorage.getItem('out_url')) localStorage.setItem('out_url', 'https://script.google.com/macros/s/AKfycbyOfzoFywG02Yg3LPdV9bQP9tcQqhCiGurLXFOCGSIRuSI92BA3jSKnDqtmPDMSt__r/exec');
     if (!localStorage.getItem('out_line')) localStorage.setItem('out_line', 'mJeaffCgOfpp8wGoCVPBIPmN2xF6hTGmJ2jrsD+8nM+aw06l6XgnG4FN15gtMIf3zmg1Ykv1ftyhQFL2747GUAza3t29pMaE73j3XkEd1ukz5kDu61Emig1G0mJ79ePVAaJeJehzQh709C0l3rs7+wdB04t89/1O/w1cDnyilFU=');
     if (!localStorage.getItem('out_group')) localStorage.setItem('out_group', 'C6221fd159fa6f8f54c7137d7a74e7f65');
   })();
@@ -436,8 +436,8 @@ async function fetchPrev(){
   el.textContent='⏳ กำลังดึงข้อมูลจาก Sheet...';
   try{
     const [r1, r2] = await Promise.all([
-      fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getEvening'),
-      fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getTodayIn&sheet='+encodeURIComponent('บาร์น้ำ (เหลือ)')+'&type=out')
+      fetch('https://script.google.com/macros/s/AKfycbyOfzoFywG02Yg3LPdV9bQP9tcQqhCiGurLXFOCGSIRuSI92BA3jSKnDqtmPDMSt__r/exec?action=getEvening'),
+      fetch('https://script.google.com/macros/s/AKfycbyOfzoFywG02Yg3LPdV9bQP9tcQqhCiGurLXFOCGSIRuSI92BA3jSKnDqtmPDMSt__r/exec?action=getTodayIn&sheet='+encodeURIComponent('บาร์น้ำ (เหลือ)')+'&type=out')
     ]);
     const j1=await r1.json();
     const j2=await r2.json();
@@ -750,7 +750,7 @@ async function fetchHistory(){
   const el=document.getElementById('hlist');
   el.innerHTML='<div class="empty">⏳ กำลังโหลด...</div>';
   try{
-    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getHistory&sheet='+encodeURIComponent('บาร์น้ำ (เหลือ)')+'&type=out');
+    const r=await fetch('https://script.google.com/macros/s/AKfycbyOfzoFywG02Yg3LPdV9bQP9tcQqhCiGurLXFOCGSIRuSI92BA3jSKnDqtmPDMSt__r/exec?action=getHistory&sheet='+encodeURIComponent('บาร์น้ำ (เหลือ)')+'&type=out');
     const j=await r.json();
     if(!j.history||!j.history.length){
       el.innerHTML='<div class="empty">ยังไม่มีข้อมูล</div>';
@@ -828,7 +828,7 @@ async function saveItems(){
 
 async function fetchItems(){
   try{
-    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getItems&sheet='+encodeURIComponent('รายการวัตถุดิบ'));
+    const r=await fetch('https://script.google.com/macros/s/AKfycbyOfzoFywG02Yg3LPdV9bQP9tcQqhCiGurLXFOCGSIRuSI92BA3jSKnDqtmPDMSt__r/exec?action=getItems&sheet='+encodeURIComponent('รายการวัตถุดิบ'));
     const j=await r.json();
     if(j.items&&j.items.length){
       ITEMS=j.items;
@@ -860,7 +860,7 @@ function renderThresh(){
 
 async function fetchStaff(){
   try{
-    const r=await fetch('https://script.google.com/macros/s/AKfycbygcgxxqJNjT8xtFjRTX-cZ1yx6X1_QSU2zSk6t_2OIdek1s800o44VMNVyFvrv1Sey/exec?action=getStaff');
+    const r=await fetch('https://script.google.com/macros/s/AKfycbyOfzoFywG02Yg3LPdV9bQP9tcQqhCiGurLXFOCGSIRuSI92BA3jSKnDqtmPDMSt__r/exec?action=getStaff');
     const j=await r.json();
     if(j.staff&&j.staff.length){
       STAFF=j.staff;
