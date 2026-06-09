@@ -548,9 +548,9 @@ function onInp(i){
   const isNeg=done&&used!=null&&used<0;
   hintEl.className=isLow?'hint low':isNeg?'hint negative':'hint';
   if(isNeg){
+    hintText+=' (ติดลบ)';
     const negList = document.getElementById('neg-list');
-    const unit = ITEMS.find(it=>it.key===key)?.unit||'g';
-    negList.innerHTML = `<div>• ${key}: ใช้ไป ${used.toLocaleString('th')} ${unit}</div>`;
+    negList.innerHTML = `<div>• ${it.key}: ใช้ไป ${used.toLocaleString('th')} ${it.unit||'g'}</div>`;
     document.getElementById('neg-popup').classList.add('show');
   }
   hintEl.textContent=hintText;
