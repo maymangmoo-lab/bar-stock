@@ -154,11 +154,10 @@ tr:hover td{background:var(--surface2)}
     </div>
   </div>
   <div class="nav">
-    <button class="nav-btn on" id="nav0" onclick="goPage(0)">📊 Overview</button>
-    <button class="nav-btn" id="nav1" onclick="goPage(1)">📋 Raw Data</button>
-    <button class="nav-btn" id="nav2" onclick="goPage(2)">📈 วิเคราะห์</button>
-    <button class="nav-btn" id="nav3" onclick="goPage(3)">💰 ต้นทุน</button>
-    <button class="nav-btn" id="nav4" onclick="goPage(4)">📦 Waste</button>
+    <button class="nav-btn on" id="nav0" onclick="goPage(0)">📋 Raw Data</button>
+    <button class="nav-btn" id="nav1" onclick="goPage(1)">📈 วิเคราะห์</button>
+    <button class="nav-btn" id="nav2" onclick="goPage(2)">💰 ต้นทุน</button>
+    <button class="nav-btn" id="nav3" onclick="goPage(3)">📦 Waste</button>
   </div>
   <div class="content" id="content"></div>
 </div>
@@ -212,7 +211,7 @@ async function init(){
   await loadItems();
   await loadPrices();
   await loadRanges();
-  goPage(0);
+  goPage(0); // Raw Data
 }
 
 async function loadItems(){
@@ -254,8 +253,8 @@ async function setBar(bar){
 // ===== NAV =====
 function goPage(n){
   PAGE = n;
-  for(let i=0;i<5;i++) document.getElementById('nav'+i).classList.toggle('on', i===n);
-  const pages = [renderOverview, renderRawData, renderAnalyze, renderCost, renderWaste];
+  for(let i=0;i<4;i++) document.getElementById('nav'+i).classList.toggle('on', i===n);
+  const pages = [renderRawData, renderAnalyze, renderCost, renderWaste];
   pages[n]();
 }
 
@@ -396,7 +395,7 @@ async function loadRawData(){
   el.innerHTML='<div class="loading">⏳ กำลังโหลด...</div>';
   try{
     const sheet = BAR==='ขนม'?'ขนม':'';
-    const r = await fetch(SCRIPT+'?action=getDailyData&sheet='+sheet+'&dateFrom='+from+'&dateTo='+to);
+    const r = await fetch(SCRIPT+'?action=getActualUsed&sheet='+sheet+'&dateFrom='+from+'&dateTo='+to);
     const j = await r.json();
     rawCache = j.data||[];
     if(!rawCache.length){ el.innerHTML='<div class="empty">ไม่มีข้อมูลในช่วงนี้</div>'; return; }
