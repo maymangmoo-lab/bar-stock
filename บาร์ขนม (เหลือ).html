@@ -556,7 +556,22 @@ function onInp(i){
   const isNeg=done&&used!=null&&used<0;
   hintEl.className=isLow?'hint low':isNeg?'hint negative':'hint';
   if(isNeg){
-    showAlert('err','กรุณาแก้ไขข้อมูลให้ไม่ติดลบก่อนบันทึก');
+    showAlert('err','กรุณาแก้ไขข้อมูลให้ไม่ติดลบก่อนบันทึก', true);
+  } else {
+    // ถ้าไม่มีรายการติดลบเลย ลบ alert ติดลบออก
+    const anyNeg = ITEMS.some((it2,j)=>{
+      const v2 = document.getElementById('inp'+j)?.value;
+      if(!v2) return false;
+      const used2 = calcUsed(it2.key, parseFloat(v2));
+      return used2!=null && used2<0;
+    });
+    if(!anyNeg){
+      const el=document.getElementById('alert');
+      if(el.textContent.includes('ติดลบ')){
+        clearTimeout(alertTimer);
+        el.style.display='none';
+      }
+    }
   }
   hintEl.textContent=hintText;
 
@@ -722,11 +737,11 @@ function doReset(){DRAFT={};S.set('kn_out_draft_'+todayKey(),{});closeRC();rende
 
 // ALERT
 let alertTimer;
-function showAlert(type,msg){
+function showAlert(type,msg,persist=false){
   const el=document.getElementById('alert');
   el.className='alert '+type; el.textContent=msg;
   clearTimeout(alertTimer);
-  alertTimer=setTimeout(()=>{el.style.display='none';},7000);
+  if(!persist) alertTimer=setTimeout(()=>{el.style.display='none';},7000);
 }
 
 // HISTORY
