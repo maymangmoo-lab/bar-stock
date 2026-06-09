@@ -556,9 +556,7 @@ function onInp(i){
   const isNeg=done&&used!=null&&used<0;
   hintEl.className=isLow?'hint low':isNeg?'hint negative':'hint';
   if(isNeg){
-    const negList = document.getElementById('neg-list');
-    negList.innerHTML = `<div>• ${it.key}: ใช้ไป ${used.toLocaleString('th')} ${it.unit||'g'}</div>`;
-    document.getElementById('neg-popup').classList.add('show');
+    showAlert('err','กรุณาแก้ไขข้อมูลให้ไม่ติดลบก่อนบันทึก');
   }
   hintEl.textContent=hintText;
 
